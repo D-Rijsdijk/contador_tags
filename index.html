@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Contador de Tags HTML</title>
+    <!-- Importação da fonte do Google Fonts -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Arial:wght@400;700&display=swap"
+      rel="stylesheet"
+    />
+    <!-- Estilos CSS incorporados na página -->
+    <style>
+      /* Definição do estilo do corpo da página */
+      body {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        margin: 0;
+        font-family: Arial, sans-serif;
+      }
+
+      /* Estilo para o cabeçalho h1 */
+      h1 {
+        font-weight: bold;
+      }
+
+      /* Estilo para a tabela */
+      table {
+        border-collapse: collapse;
+        width: 100%;
+      }
+
+      /* Estilo para o cabeçalho das colunas da tabela */
+      th {
+        font-weight: bold;
+      }
+
+      /* Estilo para as células da tabela */
+      th,
+      td {
+        border: 1px solid #dddddd;
+        text-align: left;
+        padding: 8px;
+      }
+
+      /* Estilo para linhas pares da tabela */
+      tr:nth-child(even) {
+        background-color: #f2f2f2;
+      }
+
+      /* Estilo para o botão de processar páginas */
+      button {
+        background-color: #4caf50;
+        color: white;
+        padding: 10px;
+        border: 1px solid #303134;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 16px;
+        margin: 20px;
+      }
+
+      /* Estilo para o botão de processar páginas ao passar o mouse */
+      button:hover {
+        background-color: #388e3c;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Título principal da página -->
+    <h1>Contador de Tags HTML</h1>
+    <!-- Instrução para informar as URLs -->
+    <p>Informe as URLs abaixo (separadas por vírgula):</p>
+    <!-- Campo de texto para digitar as URLs -->
+    <textarea id="urlsInput" rows="5" cols="50"></textarea>
+    <!-- Botão para acionar o processamento das páginas -->
+    <button id="processButton">Processar Páginas</button>
+    <!-- Div para exibir a tabela de resultados -->
+    <div id="resultTable"></div>
+
+    <!-- Script incorporado na página -->
+    <script>
+      // Adiciona um ouvinte de evento ao botão de processar páginas
+      document
+        .getElementById("processButton")
+        .addEventListener("click", async () => {
+          // Obtém as URLs digitadas no campo de texto
+          const urlsInput = document.getElementById("urlsInput").value;
+          // Divide as URLs em um array, usando vírgula como separador
+          const urls = urlsInput.split(",");
+
+          try {
+            // Faz uma requisição GET assíncrona para o servidor com as URLs fornecidas
+            const response = await fetch(
+              `http://localhost:3000/processar?urls=${urls}`,
+              {
+                method: "GET",
+              }
+            );
+
+            // Converte a resposta em formato JSON
+            const result = await response.json();
+            // Chama a função para mostrar o resultado na tabela
+            mostrarResultado(result);
+          } catch (error) {
+            // Exibe uma mensagem de erro no console em caso de falha na requisição
+            console.error("Erro ao processar as URLs:", error);
+          }
+        });
+
+      // Função para mostrar o resultado na tabela HTML
+      function mostrarResultado(result) {
+        // Obtém o elemento da div que conterá a tabela
+        const tableDiv = document.getElementById("resultTable");
+        // Variável para construir o código HTML da tabela
+        let tableHTML =
+          "<table><tr><th>URL</th><th>Tag</th><th>Quantidade</th></tr>";
+
+        // Itera pelos resultados recebidos do servidor
+        for (const item of result) {
+          if (item.error) {
+            // Se houver um erro na página, exibe uma linha com o erro
+            tableHTML += `<tr><td>${item.url}</td><td colspan="2">${item.error}</td></tr>`;
+          } else {
+            // Caso contrário, itera pelas tags e quantidades coletadas
+            for (const tag in item.tags) {
+              tableHTML += `<tr><td>${item.url}</td><td>${tag}</td><td>${item.tags[tag]}</td></tr>`;
+            }
+          }
+        }
+
+        // Fecha a tabela e insere o código HTML na div
+        tableHTML += "</table>";
+        tableDiv.innerHTML = tableHTML;
+      }
+    </script>
+  </body>
+</html>
